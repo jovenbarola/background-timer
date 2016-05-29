@@ -28,4 +28,4 @@ BackgroundTimer = (function() {
         }
     };
     return BackgroundTimer;
-})(); - See more at: http: //fiddlesalad.com/coffeescript/#sthash.azTi2ZeW.dpuf
+})();
