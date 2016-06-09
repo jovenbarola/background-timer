@@ -1,22 +1,67 @@
 class BackgroundTimer
-	constructor: (@interval, @callback)->
-		@timerID = setTimeout =>
-                    @callback()
-                , @interval
-		@expirationDate = new Date(Date.now() + @interval)
+    constructor: (@interval, @callback)->
+  
+    start: ->
+        console.log "starting"
+        @startTicking() if @tickingEnabled
+        @timerID = setTimeout =>
+            @callback()
+            @cancel()
+        , @interval
+        
+        document.addEventListener 'resume', =>
+            console.log "resume"
+            @wakeup()
+        , false
+        
+        @expirationDate = moment(moment() + @interval)
+        @running = true
 
-	wakeup: ->
-		if @timerID
-			remaining = @expirationDate - new Date();
-			@cancel();
-			
-			if remaining > 0
-				@constructor(remaining, @callback)
-			else
-				@callback()
+    getRemaining: ->
+        @expirationDate - moment()
 
-	cancel: ->
-		if @timerID
-			clearTimeout @timerData
-			@timerData = null
-			
+    wakeup: ->
+        if @running
+            remaining = @getRemaining()
+            @cancel()
+
+            if remaining > 0
+                @constructor(remaining, @callback)
+                @start()
+            else
+                @callback()
+                @cancel
+
+    enableTicking: (@tickInterval, @tickCallback) ->
+        @tickingEnabled = true
+    
+    pauseTicking: ->
+        if @tickerID
+            clearInterval @tickerID
+            @tickerID = null
+    
+    resumeTicking: ->
+        @startTicking()
+    
+    roundTime: (time) ->
+        Math.floor((time + 100) / 1000) * 1000
+        
+    startTicking: ->
+        if @tickingEnabled
+            @tickerID = setInterval =>
+                @tickCallback @roundTime(@getRemaining())
+            , @tickInterval     
+
+    disableTicking: ->
+        if @tickerID
+            @tickingEnabled = false
+            clearInterval @tickerID
+            @tickerID = null
+        
+    cancel: ->
+        console.log "cancel"
+        if @running
+            @running = false
+            @pauseTicking()
+            clearTimeout @timerID
+            @timerID = null
