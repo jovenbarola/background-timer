@@ -27,3 +27,6 @@ timer.enableTicking(1000, function(remaining) {
 
 timer.start();
 ```
+
+Please note :
+  - All time parameters are in milliseconds
